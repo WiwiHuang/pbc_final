@@ -245,7 +245,7 @@ elif menu == "每日身體紀錄":
                 weight = st.number_input("今天的體重（kg）", min_value=30.0, max_value=200.0, step=0.1)
                 fat = st.number_input("體脂率（%）", min_value=0.0, max_value=60.0, step=0.1)
                 exercise_min = st.number_input("今日運動時間（分鐘）", 0, 300, step=5)
-                notes = st.text_area("備註（可選）")
+                #notes = st.text_area("備註（可選）")
                 submitted = st.form_submit_button("儲存紀錄")
 
                 if submitted:
@@ -259,13 +259,13 @@ elif menu == "每日身體紀錄":
                             weight REAL,
                             fat_percentage REAL,
                             exercise_minutes INTEGER,
-                            notes TEXT
+                            
                         )
                     """)
                     cursor.execute("""
-                        INSERT INTO body_logs (email, date, weight, fat_percentage, exercise_minutes, notes)
-                        VALUES (?, ?, ?, ?, ?, ?)
-                    """, (st.session_state.email, today, weight, fat, exercise_min, notes))
+                        INSERT INTO body_logs (email, date, weight, fat_percentage, exercise_minutes)
+                        VALUES (?, ?, ?, ?, ?)
+                    """, (st.session_state.email, today, weight, fat, exercise_min))
                     conn.commit()
                     conn.close()
                     st.success("✅ 今日紀錄已儲存！")
@@ -278,7 +278,7 @@ elif menu == "每日身體紀錄":
             old_weight = existing_entry[3]
             old_fat = existing_entry[4]
             old_exercise = existing_entry[5]
-            old_notes = existing_entry[6]
+            #old_notes = existing_entry[6]
 
             new_weight = st.number_input("✏️ 體重（kg）", value=old_weight, min_value=30.0, max_value=200.0, step=0.1, key="edit_weight")
             new_fat = st.number_input("✏️ 體脂率（%）", value=old_fat, min_value=0.0, max_value=60.0, step=0.1, key="edit_fat")
@@ -290,9 +290,9 @@ elif menu == "每日身體紀錄":
                 cursor = conn.cursor()
                 cursor.execute("""
                     UPDATE body_logs
-                    SET weight = ?, fat_percentage = ?, exercise_minutes = ?, notes = ?
+                    SET weight = ?, fat_percentage = ?, exercise_minutes = ?
                     WHERE email = ? AND date = ?
-                """, (new_weight, new_fat, new_exercise, new_notes, st.session_state.email, today))
+                """, (new_weight, new_fat, new_exercise, st.session_state.email, today))
                 conn.commit()
                 conn.close()
                 st.success("✅ 修改完成！")
@@ -318,9 +318,9 @@ elif menu == "每日身體紀錄":
                         st.warning("⚠️ 該日期已有紀錄，無法重複輸入！")
                     else:
                         cursor.execute("""
-                            INSERT INTO body_logs (email, date, weight, fat_percentage, exercise_minutes, notes)
-                            VALUES (?, ?, ?, ?, ?, ?)
-                        """, (st.session_state.email, backfill_date.isoformat(), weight, fat, exercise_min, notes))
+                            INSERT INTO body_logs (email, date, weight, fat_percentage, exercise_minutes)
+                            VALUES (?, ?, ?, ?, ?)
+                        """, (st.session_state.email, backfill_date.isoformat(), weight, fat, exercise_min))
                         conn.commit()
                         conn.close()
                         st.success(f"✅ 已成功補登入 {backfill_date} 的紀錄！")
