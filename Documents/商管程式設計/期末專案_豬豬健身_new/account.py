@@ -1,7 +1,7 @@
 # account.py
 import sqlite3
 
-# ✅ 使用者註冊函式
+# 使用者註冊函式
 def register_user(email, name, password, school, birthday, gender, height, weight, exercise,goal):
     """
     將新使用者資料寫入 SQLite 資料庫。
@@ -25,7 +25,7 @@ def register_user(email, name, password, school, birthday, gender, height, weigh
 
     return "✅ 註冊成功！請返回登入頁面"
 
-# ✅ 使用者登入函式
+# 使用者登入函式
 def login(email, password):
     """
     檢查使用者登入資訊是否正確。

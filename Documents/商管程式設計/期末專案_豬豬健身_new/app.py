@@ -14,11 +14,11 @@ import matplotlib.pyplot as plt
 
 
 
- # ✅ 設定 Gemini API 金鑰
+ # 設定 Gemini API 金鑰
 API_KEY = "AIzaSyDt-ePwvoedMgCwtA4Hfde6lVrr-VTQYiQ"
 genai.configure(api_key=API_KEY)
 
-    # ✅ 定義 Gemini 建議函數
+    # 定義 Gemini 建議函數
 def generate_gemini_feedback(actual_calories, recommended_calories):
     if actual_calories == 0:
         return "你今天好像什麼都沒吃耶！趕快去吃飯吧～"
@@ -81,9 +81,9 @@ def show_pig_image(school, level):
     """
     顯示對應豬豬等級圖片
     """
-    # 正確拼接圖片路徑
-    img_path = f"images/{school}_level{level}.png"
-    #st.write(f"嘗試加載圖片路徑：{img_path}")  # 日誌輸出圖片路徑，方便排查
+    # 正確拼接圖片路徑（相）
+    img_path = f"images/{school}_level{level}.png" 
+    
     try:
         img = Image.open(img_path)
         # 使用 use_container_width 替代 use_column_width，並控制寬度
@@ -194,7 +194,7 @@ elif menu == "註冊":
             "法律學院", "醫學院"
         ]
         school = st.selectbox("就讀學院", school_list)
-        goal = st.radio("你的目標是？", ["增肌", "減脂", "維持現狀"], horizontal=True)
+        goal = st.radio("你的目標是？", ["增肌", "減脂", "維持"], horizontal=True)
         height = st.number_input("身高（cm）", 100.0, 250.0, step=0.1)
         weight = st.number_input("體重（kg）", 30.0, 200.0, step=0.1)
         exercise = st.slider("每週運動次數（有氧 / 重訓）", 0, 14, 3)
@@ -239,7 +239,7 @@ elif menu == "每日身體紀錄":
         existing_entry = cursor.fetchone()
         conn.close()
 
-        # ✅ 狀況 1：今天尚未填寫 → 顯示輸入表單
+        # 狀況 1：今天尚未填寫 → 顯示輸入表單
         if not existing_entry:
             with st.form("log_form"):
                 weight = st.number_input("今天的體重（kg）", min_value=30.0, max_value=200.0, step=0.1)
@@ -271,7 +271,7 @@ elif menu == "每日身體紀錄":
                     st.success("✅ 今日紀錄已儲存！")
                     st.rerun()
 
-# ✅ 狀況 2：今天已填過 → 顯示修改表單
+# 狀況 2：今天已填過 → 顯示修改表單
         else:
             st.info("✅ 今天已有紀錄，請在下方修改。")
 
@@ -283,7 +283,7 @@ elif menu == "每日身體紀錄":
             new_weight = st.number_input("✏️ 體重（kg）", value=old_weight, min_value=30.0, max_value=200.0, step=0.1, key="edit_weight")
             new_fat = st.number_input("✏️ 體脂率（%）", value=old_fat, min_value=0.0, max_value=60.0, step=0.1, key="edit_fat")
             new_exercise = st.number_input("✏️ 運動時間（分鐘）", value=old_exercise, min_value=0, max_value=300, step=5, key="edit_exercise")
-            new_notes = st.text_area("✏️ 備註", value=old_notes, key="edit_notes")
+            #new_notes = st.text_area("✏️ 備註", value=old_notes, key="edit_notes")
 
             if st.button("💾 儲存修改"):
                 conn = sqlite3.connect("healthpiggy.db")
@@ -297,8 +297,35 @@ elif menu == "每日身體紀錄":
                 conn.close()
                 st.success("✅ 修改完成！")
                 st.rerun()
+        with st.expander("📅 補登入過去的紀錄"):
+            with st.form("backfill_form"):
+                backfill_date = st.date_input("選擇日期", min_value=date(2000, 1, 1), max_value=date.today())
+                weight = st.number_input("體重（kg）", min_value=30.0, max_value=200.0, step=0.1, key="backfill_weight")
+                fat = st.number_input("體脂率（%）", min_value=0.0, max_value=60.0, step=0.1, key="backfill_fat")
+                exercise_min = st.number_input("運動時間（分鐘）", 0, 300, step=5, key="backfill_exercise")
+                #notes = st.text_area("備註（可選）", key="backfill_notes")
+                submitted = st.form_submit_button("儲存補登入紀錄")
 
-        # 📈 顯示歷史紀錄
+                if submitted:
+                    conn = sqlite3.connect("healthpiggy.db")
+                    cursor = conn.cursor()
+                    cursor.execute("""
+                        SELECT * FROM body_logs WHERE email = ? AND date = ?
+                    """, (st.session_state.email, backfill_date.isoformat()))
+                    existing_entry = cursor.fetchone()
+
+                    if existing_entry:
+                        st.warning("⚠️ 該日期已有紀錄，無法重複輸入！")
+                    else:
+                        cursor.execute("""
+                            INSERT INTO body_logs (email, date, weight, fat_percentage, exercise_minutes, notes)
+                            VALUES (?, ?, ?, ?, ?, ?)
+                        """, (st.session_state.email, backfill_date.isoformat(), weight, fat, exercise_min, notes))
+                        conn.commit()
+                        conn.close()
+                        st.success(f"✅ 已成功補登入 {backfill_date} 的紀錄！")
+                        st.rerun()
+        # 顯示歷史紀錄
         st.subheader("📈 歷史紀錄趨勢")
         conn = sqlite3.connect("healthpiggy.db")
         df = pd.read_sql_query("SELECT date, weight, fat_percentage, exercise_minutes FROM body_logs WHERE email = ? ORDER BY date", conn, params=[st.session_state.email])
@@ -339,7 +366,7 @@ elif menu == "每日飲食紀錄":
         st.error(f"讀取營養資料失敗：{e}")
         st.stop()
 
-    # 🔍 食物搜尋
+    # 食物搜尋
     search_name = st.text_input("🔍 輸入食物關鍵字（例如：雞肉、飯）")
     matches = nutrition_df[nutrition_df["食物名稱"].str.contains(search_name, na=False, regex=False)]
     meal_type = st.radio("用餐時段", ["早餐", "午餐", "晚餐", "其他"], horizontal=True)
@@ -395,7 +422,7 @@ elif menu == "每日飲食紀錄":
     elif search_name:
         st.info("找不到相關食物，請嘗試其他關鍵字")
 
-    # 📋 顯示攝取總覽
+    # 顯示攝取總覽
     st.subheader("📋 今日攝取總覽")
     try:
         conn = sqlite3.connect("healthpiggy.db")
@@ -422,10 +449,10 @@ elif menu == "每日飲食紀錄":
                 fig, ax = plt.subplots()
                 ax.pie(
                     meal_summary["kcal"],
-                    labels=meal_summary.index,       # ✅ 顯示 早餐/午餐/晚餐
+                    labels=meal_summary.index,       # 顯示 早餐/午餐/晚餐
                     autopct="%1.1f%%",
-                    startangle=90,                    # 🔄 圓餅圖從上方開始（美觀）
-                    wedgeprops={"edgecolor": "white"}  # 美觀：讓區塊邊緣更清楚
+                    startangle=90,                    # 圓餅圖從上方開始
+                    wedgeprops={"edgecolor": "white"}  
                 )
                 ax.set_title("三餐熱量比例", fontsize=7, color="darkblue")
                 ax.axis("equal")  # 讓圓餅圖保持圓形
@@ -436,7 +463,7 @@ elif menu == "每日飲食紀錄":
 
         st.dataframe(df[['meal_type',"food", "grams", "kcal", "protein", "fat", "carb"]])
 
-        # 🗑️ 刪除紀錄按鈕
+        # 刪除紀錄按鈕
         st.subheader("📋 今日攝取紀錄")
         for i, row in df.iterrows():
             col1, col2 = st.columns([4, 1])
@@ -454,7 +481,7 @@ elif menu == "每日飲食紀錄":
                     st.success(f"✅ 已刪除 {row['food']} 的紀錄")
                     st.rerun()
 
-        # 🤖 AI 建議
+        # AI 建議
         if "tdee" not in st.session_state:
             st.info("尚未計算 TDEE，請至『我的健康資料』頁面填寫並儲存基本資料")
         else:
@@ -487,7 +514,7 @@ elif menu == "編輯個人基本資料":
             new_height = st.number_input("身高（cm）", 100.0, 250.0, value=current_height, step=0.1)
             new_weight = st.number_input("體重（kg）", 30.0, 200.0, value=current_weight, step=0.1)
             new_exercise = st.slider("每週運動次數（有氧 / 重訓）", 0, 14, value=current_exercise)
-            new_goal = st.radio("你的目標是？", ["增肌", "減脂", "維持現狀"], index=["增肌", "減脂", "維持現狀"].index(current_goal), horizontal=True)
+            new_goal = st.radio("你的目標是？", ["增肌", "減脂", "維持"], index=["增肌", "減脂", "維持"].index(current_goal), horizontal=True)
 
             if st.button("✅ 儲存變更"):
                 try:
