@@ -2,7 +2,7 @@
 import sqlite3
 
 # 使用者註冊函式
-def register_user(email, name, password, school, birthday, gender, height, weight, exercise,goal):
+def register_user(email, name, password, school, birthday, gender, height, weight, exercise, goal):
     """
     將新使用者資料寫入 SQLite 資料庫。
     若 email 已存在，則不允許重複註冊。

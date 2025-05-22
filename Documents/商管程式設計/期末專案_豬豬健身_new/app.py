@@ -258,8 +258,7 @@ elif menu == "每日身體紀錄":
                             date TEXT,
                             weight REAL,
                             fat_percentage REAL,
-                            exercise_minutes INTEGER,
-                            
+                            exercise_minutes INTEGER
                         )
                     """)
                     cursor.execute("""
@@ -398,8 +397,7 @@ elif menu == "每日飲食紀錄":
                         protein REAL,
                         fat REAL,
                         carb REAL,
-                        meal_type TEXT
-                               
+                        meal_type TEXT     
                     )
                 """)
                 cursor.execute("INSERT INTO food_logs (email, date, food, grams, kcal, protein, fat, carb,meal_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (
