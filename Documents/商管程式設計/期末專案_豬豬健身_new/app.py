@@ -12,8 +12,6 @@ import google.generativeai as genai
 import os
 import matplotlib.pyplot as plt
 
-
-
  # 設定 Gemini API 金鑰
 API_KEY = "AIzaSyDt-ePwvoedMgCwtA4Hfde6lVrr-VTQYiQ"
 genai.configure(api_key=API_KEY)
@@ -76,7 +74,6 @@ def get_pig_level(intake, goal):
         return 3
     else:
         return 4
-
 def show_pig_image(school, level):
     """
     顯示對應豬豬等級圖片
@@ -143,8 +140,6 @@ def show_profile(email):
     pig_level = get_pig_level(today_intake, tdee)
 
     # 顯示豬豬等級圖片
-    
-    
     st.markdown(f"""
     - 🎂 年齡：{age} 歲
     - 🏫 學院：{school}
@@ -219,7 +214,6 @@ elif menu == "登入":
             st.rerun()  # ← 重新載入頁面以顯示「我的健康資料」
         else:
             st.error(result)
-
 
 elif menu == "我的健康資料":
     if st.session_state.email:
@@ -489,7 +483,7 @@ elif menu == "每日飲食紀錄":
             else:
                 st.warning(f"⚠️ 你已超過目標熱量 **{-remaining} kcal**")
 
-            st.subheader("🤖 Gemini AI 建議")
+            st.subheader("🤖 Gemini AI 飲食建議")
             feedback = generate_gemini_feedback(df_sum.kcal, st.session_state.tdee)
             st.markdown(f"💡 **{feedback}**")
             st.subheader("💖 Gemini AI の 情緒價值 💖")
@@ -565,4 +559,3 @@ if st.sidebar.button("🔓 登出"):
     else:
         st.info("你尚未登入帳號")
     st.session_state.menu = "首頁"
-
